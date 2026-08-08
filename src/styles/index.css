@@ -1,0 +1,445 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+
+/* ── Theme variant ────────────────────────────────────────────────────────
+   Dark mode is class-driven (`<html class="dark">`) so the user's explicit
+   choice always wins over the OS setting. index.html sets it pre-paint. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Raw palette ─────────────────────────────────────────────────────────
+   The only place literal colours are allowed. Everything downstream speaks
+   in semantic tokens so a re-skin is a single-file change. */
+:root {
+  /* brand — the forest green of the Teatap wordmark */
+  --brand-50: #edf7ee;
+  --brand-100: #d3ecd6;
+  --brand-200: #a8d9af;
+  --brand-300: #74c07f;
+  --brand-400: #45a453;
+  --brand-500: #268a35;
+  --brand-600: #1b7a2e;
+  --brand-700: #176127;
+  --brand-800: #154d22;
+  --brand-900: #12401e;
+  --brand-950: #06210d;
+
+  /* accent — the terracotta cup */
+  --accent-100: #fbe9d8;
+  --accent-300: #eeae6d;
+  --accent-500: #e08a35;
+  --accent-600: #c4651e;
+  --accent-700: #9c4d17;
+
+  /* neutrals — very slightly warm so cards feel like paper, not steel */
+  --n-0: #ffffff;
+  --n-25: #fbfcfb;
+  --n-50: #f5f7f6;
+  --n-100: #eceff0;
+  --n-200: #dee3e3;
+  --n-300: #c5cccc;
+  --n-400: #9aa3a4;
+  --n-500: #717c7d;
+  --n-600: #566060;
+  --n-700: #3f4848;
+  --n-800: #262d2d;
+  --n-850: #1b2121;
+  --n-900: #131818;
+  --n-950: #0b0f0e;
+
+  --ok-500: #16a34a;
+  --ok-100: #dcfce7;
+  --warn-500: #d97706;
+  --warn-100: #fef3c7;
+  --danger-500: #dc2626;
+  --danger-100: #fee2e2;
+  --info-500: #2563eb;
+  --info-100: #dbeafe;
+}
+
+/* ── Semantic tokens · light ─────────────────────────────────────────── */
+:root {
+  --bg: var(--n-50);
+  --surface: var(--n-0);
+  --surface-2: var(--n-25);
+  --surface-3: var(--n-100);
+  --overlay: rgb(11 15 14 / 0.45);
+
+  --fg: var(--n-900);
+  --fg-muted: var(--n-500);
+  --fg-subtle: var(--n-400);
+  --fg-inverted: var(--n-0);
+
+  --border: var(--n-200);
+  --border-strong: var(--n-300);
+
+  --primary: var(--brand-600);
+  --primary-hover: var(--brand-700);
+  --primary-soft: var(--brand-50);
+  --primary-soft-fg: var(--brand-700);
+  --primary-fg: #ffffff;
+  --ring: var(--brand-500);
+
+  --accent: var(--accent-600);
+  --accent-soft: var(--accent-100);
+  --accent-soft-fg: var(--accent-700);
+
+  --success: var(--ok-500);
+  --success-soft: var(--ok-100);
+  --warning: var(--warn-500);
+  --warning-soft: var(--warn-100);
+  --danger: var(--danger-500);
+  --danger-soft: var(--danger-100);
+  --info: var(--info-500);
+  --info-soft: var(--info-100);
+
+  --shadow-color: 190 20% 25%;
+  --sidebar-bg: var(--n-0);
+
+  /* Categorical chart hues — fixed order, never cycled.
+     Validated for CVD separation + contrast against the light surface. */
+  --chart-1: #1b7a2e;
+  --chart-2: #2563eb;
+  --chart-3: #c4651e;
+  --chart-4: #b3308c;
+  --chart-5: #8a8f14;
+  --chart-grid: var(--n-200);
+  --chart-axis: var(--n-400);
+
+  color-scheme: light;
+}
+
+/* ── Semantic tokens · dark ──────────────────────────────────────────── */
+.dark {
+  --bg: var(--n-950);
+  --surface: var(--n-900);
+  --surface-2: var(--n-850);
+  --surface-3: var(--n-800);
+  --overlay: rgb(0 0 0 / 0.6);
+
+  --fg: #eef2f1;
+  --fg-muted: var(--n-400);
+  --fg-subtle: var(--n-500);
+  --fg-inverted: var(--n-950);
+
+  --border: #232b2b;
+  --border-strong: #33403f;
+
+  --primary: var(--brand-400);
+  --primary-hover: var(--brand-300);
+  --primary-soft: #0d2b28;
+  --primary-soft-fg: var(--brand-300);
+  --primary-fg: #04211f;
+  --ring: var(--brand-400);
+
+  --accent: var(--accent-300);
+  --accent-soft: #3a2a10;
+  --accent-soft-fg: var(--accent-300);
+
+  --success: #4ade80;
+  --success-soft: #102b1b;
+  --warning: #fbbf24;
+  --warning-soft: #33260c;
+  --danger: #f87171;
+  --danger-soft: #3a1616;
+  --info: #60a5fa;
+  --info-soft: #12233f;
+
+  --shadow-color: 180 30% 2%;
+  --sidebar-bg: var(--n-900);
+
+  /* Re-stepped for the dark surface, not flipped — same hues, own lightness
+     band, re-validated for CVD separation and 3:1 contrast on #131818. */
+  --chart-1: #35a349;
+  --chart-2: #5b8def;
+  --chart-3: #d4783a;
+  --chart-4: #d75aa8;
+  --chart-5: #8f9430;
+  --chart-grid: #232b2b;
+  --chart-axis: var(--n-500);
+
+  color-scheme: dark;
+}
+
+/* ── Bridge semantic tokens into Tailwind utilities ──────────────────────
+   `inline` keeps the var() reference live, so `bg-surface` re-resolves when
+   the .dark class flips — no duplicated dark: variants across the app. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-overlay: var(--overlay);
+
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+  --color-inverted: var(--fg-inverted);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-fg: var(--primary-soft-fg);
+  --color-primary-fg: var(--primary-fg);
+  --color-ring: var(--ring);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-fg: var(--accent-soft-fg);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --color-sidebar: var(--sidebar-bg);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-card: 1rem;
+  --radius-field: 0.625rem;
+
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 1px 3px hsl(var(--shadow-color) / 0.08);
+  --shadow-md: 0 2px 4px hsl(var(--shadow-color) / 0.05), 0 6px 16px -4px hsl(var(--shadow-color) / 0.12);
+  --shadow-lg: 0 8px 32px -8px hsl(var(--shadow-color) / 0.22);
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Base layer ──────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Keyboard focus only — pointer clicks stay clean. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Numbers in tables/KPIs must align vertically. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--fg-subtle);
+    background-clip: content-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ── Composable utilities ────────────────────────────────────────────── */
+@utility card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+@utility surface-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Motion primitives — kept here so components stay declarative. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.18s var(--ease-out-quint) both;
+}
+@utility animate-pop-in {
+  animation: pop-in 0.22s var(--ease-out-quint) both;
+}
+@utility animate-slide-in-right {
+  animation: slide-in-right 0.28s var(--ease-out-quint) both;
+}
+@utility animate-rise {
+  animation: rise 0.4s var(--ease-out-quint) both;
+}
+/* Chart line draw-on. Paired with a dasharray set from the path length so the
+   stroke appears to be drawn rather than popped in. */
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--draw-length, 1000);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* Bars rise from the baseline with a hair of overshoot, so the growth reads
+   as motion rather than as a wipe. */
+@keyframes grow-up {
+  0% {
+    transform: scaleY(0);
+    opacity: 0.4;
+  }
+  70% {
+    transform: scaleY(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+/* Donut segments swing in around the centre and settle. */
+@keyframes sweep {
+  0% {
+    opacity: 0;
+    transform: rotate(-18deg) scale(0.9);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(2deg) scale(1.01);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@utility animate-draw {
+  stroke-dasharray: var(--draw-length, 1000);
+  animation: draw 1s var(--ease-out-quint) both;
+}
+@keyframes grow-right {
+  from {
+    transform: scaleX(0);
+  }
+}
+@utility animate-grow-right {
+  transform-origin: left;
+  animation: grow-right 0.6s var(--ease-out-quint) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+@utility animate-grow-up {
+  transform-origin: bottom;
+  animation: grow-up 0.62s cubic-bezier(0.34, 1.32, 0.5, 1) both;
+}
+@utility animate-sweep {
+  transform-origin: center;
+  animation: sweep 0.65s cubic-bezier(0.34, 1.28, 0.5, 1) both;
+}
+
+/* Entrance for lists and grids: the caller sets --i on each child and the
+   delay falls out of it, so nothing has to hand-write per-item timings. */
+@utility stagger-item {
+  animation: rise 0.45s var(--ease-out-quint) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* Interactive surfaces rise slightly toward the pointer. Kept to 2px — enough
+   to read as "this is clickable", not enough to shift the layout. */
+@utility lift {
+  transition:
+    transform 0.2s var(--ease-out-quint),
+    box-shadow 0.2s var(--ease-out-quint),
+    border-color 0.2s var(--ease-out-quint);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--fg) 7%, transparent),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
+  }
+}
