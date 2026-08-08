@@ -172,4 +172,5 @@ Nothing above those two files changes — no component imports a fixture directl
 reload. But the actions are real: block a vendor and its subscription, its operator
 login, the dashboard counts and the device table all move together.*
 #   t e a t a p _ a d m i n  
+ #   t e a t a p _ a d m i n  
  
