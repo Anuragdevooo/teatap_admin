@@ -11,7 +11,6 @@ import {
   Smile,
   Store,
   UserRound,
-  X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/layout';
 import {
