@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
   CheckCircle2,
   Monitor,
+  PackageOpen,
   Plus,
   Rocket,
   ShieldAlert,
@@ -17,12 +18,14 @@ import {
   CardBody,
   CardHeader,
   ConfirmDialog,
+  EmptyState,
   Field,
   Input,
   Modal,
   Progress,
   SegmentedControl,
   Select,
+  Skeleton,
   Textarea,
   useToast,
 } from '@/components/ui';
@@ -145,102 +148,147 @@ export function ReleasesPage() {
         />
       </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {visible.map((release, i) => {
-          const Icon = release.platforms.includes('Web') ? Monitor : Smartphone;
-          return (
-            <Card
-              key={release.id}
-              style={{ '--i': i } as React.CSSProperties}
-              className={cn(
-                'stagger-item lift flex flex-col',
-                release.isMinimumSupported && 'border-primary/50 ring-4 ring-primary/10',
-              )}
-            >
-              <CardHeader
-                icon={<Icon />}
-                title={
-                  <span className="flex flex-wrap items-center gap-2">
-                    v{release.version}
-                    <span className="tnum text-[11px] font-semibold text-subtle">
-                      build {release.build}
-                    </span>
-                    {release.platforms.map((p) => (
-                      <Badge key={p} tone="neutral" size="sm">
-                        {p}
-                      </Badge>
-                    ))}
-                  </span>
-                }
-                description={
-                  release.status === 'Draft'
-                    ? 'Not published yet'
-                    : `Released ${date(release.releasedAt)} · ${relativeTime(release.releasedAt)}`
-                }
-                action={
-                  <Badge tone={STATUS_TONE[release.status]} dot size="sm">
-                    {release.status}
-                  </Badge>
-                }
-              />
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ReleaseCardSkeleton key={i} index={i} />
+          ))}
+        </div>
+      ) : visible.length === 0 ? (
+        <Card className="animate-pop-in">
+          <EmptyState
+            variant="search"
+            icon={<PackageOpen />}
+            title="No releases for this platform"
+            description="Nothing has shipped to this platform yet. Switch the filter, or publish the first build."
+            action={
+              <Button
+                variant="primary"
+                leadingIcon={<Plus className="size-4" />}
+                onClick={() => setCreating(true)}
+              >
+                New release
+              </Button>
+            }
+          />
+        </Card>
+      ) : (
+        /* Keyed on the filter so the grid remounts and the stagger replays —
+           the sweep is what shows you the set actually changed. */
+        <div key={platform} className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {visible.map((release, i) => {
+            const Icon = release.platforms.includes('Web') ? Monitor : Smartphone;
+            const rolling = release.status === 'Rolling out';
+            return (
+              <Card
+                key={release.id}
+                style={{ '--i': i } as React.CSSProperties}
+                className={cn(
+                  'stagger-item lift sheen group relative flex flex-col overflow-hidden',
+                  release.isMinimumSupported && 'border-primary/50 ring-4 ring-primary/10',
+                )}
+              >
+                {/* Brand hairline along the top edge. It wipes in on hover, and
+                    stays drawn on the minimum-supported build so that card is
+                    identifiable without reading a word of it. */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute inset-x-0 top-0 h-[3px] origin-left bg-gradient-to-r from-primary to-accent',
+                    'transition-transform duration-500 ease-[var(--ease-out-quint)]',
+                    release.isMinimumSupported ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100',
+                  )}
+                />
 
-              <CardBody className="flex flex-1 flex-col gap-3.5">
-                {release.status === 'Rolling out' && (
-                  <div>
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-subtle">
-                        Rollout
+                <CardHeader
+                  icon={
+                    <Icon className="transition-transform duration-300 ease-[var(--ease-out-quint)] group-hover:-rotate-6 group-hover:scale-110" />
+                  }
+                  title={
+                    <span className="flex flex-wrap items-center gap-2">
+                      v{release.version}
+                      <span className="tnum text-[11px] font-semibold text-subtle">
+                        build {release.build}
                       </span>
-                      <span className="tnum text-[12px] font-bold text-fg">{release.rollout}%</span>
-                    </div>
-                    <Progress value={release.rollout} tone="primary" size="md" label="Rollout" />
-                  </div>
-                )}
-
-                <div>
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-subtle">
-                      Adoption
+                      {release.platforms.map((p) => (
+                        <Badge key={p} tone="neutral" size="sm">
+                          {p}
+                        </Badge>
+                      ))}
                     </span>
-                    <span className="tnum text-[12px] font-bold text-fg">{release.adoption}%</span>
+                  }
+                  description={
+                    release.status === 'Draft'
+                      ? 'Not published yet'
+                      : `Released ${date(release.releasedAt)} · ${relativeTime(release.releasedAt)}`
+                  }
+                  action={
+                    <Badge tone={STATUS_TONE[release.status]} dot pulse={rolling} size="sm">
+                      {release.status}
+                    </Badge>
+                  }
+                />
+
+                <CardBody className="flex flex-1 flex-col gap-3.5">
+                  {rolling && (
+                    <Meter
+                      label="Rollout"
+                      value={release.rollout}
+                      tone="primary"
+                      striped
+                      delay={i * 45 + 120}
+                    />
+                  )}
+
+                  <Meter
+                    label="Adoption"
+                    value={release.adoption}
+                    tone="success"
+                    delay={i * 45 + 200}
+                  />
+
+                  <ul className="flex-1 space-y-1">
+                    {release.notes.map((note, n) => (
+                      <li
+                        key={note}
+                        className="animate-rise flex items-start gap-1.5 text-[12px] text-muted"
+                        style={{ animationDelay: `${i * 45 + 220 + n * 55}ms` }}
+                      >
+                        <span className="mt-1.5 size-1 shrink-0 rounded-full bg-subtle transition-colors duration-200 group-hover:bg-primary" />
+                        {note}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {release.isMinimumSupported && (
+                    <p className="flex items-center gap-2 rounded-lg bg-primary-soft px-2.5 py-1.5 text-[11px] font-semibold text-primary-soft-fg">
+                      <span className="halo grid size-4 shrink-0 place-items-center rounded-full">
+                        <ShieldAlert className="size-3.5" />
+                      </span>
+                      Minimum supported build on {release.platforms.join(' and ')}
+                    </p>
+                  )}
+
+                  <div className="flex gap-2 border-t border-border pt-3">
+                    <Button size="sm" variant="secondary" onClick={() => setEditing(release)}>
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      leadingIcon={<ShieldAlert className="size-4" />}
+                      disabled={release.isMinimumSupported || release.status === 'Draft'}
+                      onClick={() => setConfirmMinimum(release)}
+                    >
+                      Set as minimum
+                    </Button>
                   </div>
-                  <Progress value={release.adoption} tone="success" size="md" label="Adoption" />
-                </div>
-
-                <ul className="flex-1 space-y-1">
-                  {release.notes.map((note) => (
-                    <li key={note} className="flex items-start gap-1.5 text-[12px] text-muted">
-                      <span className="mt-1.5 size-1 shrink-0 rounded-full bg-subtle" />
-                      {note}
-                    </li>
-                  ))}
-                </ul>
-
-                {release.isMinimumSupported && (
-                  <p className="flex items-center gap-2 rounded-lg bg-primary-soft px-2.5 py-1.5 text-[11px] font-semibold text-primary-soft-fg">
-                    <ShieldAlert className="size-3.5 shrink-0" />
-                    Minimum supported build on {release.platforms.join(' and ')}
-                  </p>
-                )}
-
-                <div className="flex gap-2 border-t border-border pt-3">
-                  <Button size="sm" variant="secondary" onClick={() => setEditing(release)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={release.isMinimumSupported || release.status === 'Draft'}
-                    onClick={() => setConfirmMinimum(release)}
-                  >
-                    Set as minimum
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>
-          );
-        })}
-      </div>
+                </CardBody>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       <ReleaseModal
         open={creating || !!editing}
@@ -274,6 +322,86 @@ export function ReleasesPage() {
         }}
       />
     </>
+  );
+}
+
+/**
+ * A labelled progress row whose bar and number arrive together.
+ *
+ * Both start at zero and are released after `delay`, so the fill sweeps out
+ * from the left in step with the count instead of being painted at its final
+ * width — the growth is what makes an adoption figure feel measured rather
+ * than asserted. Reduced-motion skips straight to the value.
+ */
+function Meter({
+  label,
+  value,
+  tone,
+  striped = false,
+  delay = 0,
+}: {
+  label: string;
+  value: number;
+  tone: 'primary' | 'success';
+  striped?: boolean;
+  delay?: number;
+}) {
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setShown(value);
+      return;
+    }
+    const timer = setTimeout(() => setShown(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-subtle">
+          {label}
+        </span>
+        <AnimatedNumber
+          value={shown}
+          format={(v) => `${v}%`}
+          className="text-[12px] font-bold text-fg"
+        />
+      </div>
+      <Progress value={shown} tone={tone} size="md" label={label} striped={striped} />
+    </div>
+  );
+}
+
+/** Same heights and rhythm as a real release card, so nothing jumps on load. */
+function ReleaseCardSkeleton({ index }: { index: number }) {
+  return (
+    <Card
+      style={{ '--i': index } as React.CSSProperties}
+      className="stagger-item flex flex-col"
+      aria-hidden
+    >
+      <CardHeader
+        icon={<Smartphone />}
+        title={<Skeleton shape="text" className="w-28" />}
+        description={<Skeleton shape="text" className="mt-1 w-40" />}
+        action={<Skeleton className="h-5 w-16 rounded-full" />}
+      />
+      <CardBody className="flex flex-1 flex-col gap-3.5">
+        <Skeleton className="h-2.5 w-full rounded-full" />
+        <Skeleton className="h-2.5 w-full rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton shape="text" className="w-full" />
+          <Skeleton shape="text" className="w-4/5" />
+          <Skeleton shape="text" className="w-2/3" />
+        </div>
+        <div className="flex gap-2 border-t border-border pt-3">
+          <Skeleton className="h-9 w-16" />
+          <Skeleton className="h-9 w-32" />
+        </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -393,7 +521,8 @@ function ReleaseModal({
                     })
                   }
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-field border px-3 py-2 text-[13px] font-semibold transition-all',
+                    'press inline-flex items-center gap-2 rounded-field border px-3 py-2 text-[13px] font-semibold',
+                    'transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-[var(--ease-out-quint)]',
                     on
                       ? 'border-primary bg-primary-soft text-primary-soft-fg ring-4 ring-primary/12'
                       : 'border-border bg-surface text-muted hover:border-border-strong hover:text-fg',
@@ -401,7 +530,7 @@ function ReleaseModal({
                 >
                   <PIcon className="size-4" />
                   {p}
-                  {on && <Check className="size-3.5" />}
+                  {on && <Check className="animate-pop-in size-3.5" />}
                 </button>
               );
             })}

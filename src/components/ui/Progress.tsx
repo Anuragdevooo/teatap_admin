@@ -7,6 +7,9 @@ interface ProgressProps {
   tone?: 'primary' | 'success' | 'warning' | 'danger' | 'auto';
   size?: 'xs' | 'sm' | 'md';
   label?: string;
+  /** Moving diagonal stripes. Only for work still in flight — a paused or
+   *  finished bar that keeps animating reads as a lie. */
+  striped?: boolean;
   className?: string;
 }
 
@@ -23,6 +26,7 @@ export function Progress({
   tone = 'primary',
   size = 'sm',
   label,
+  striped = false,
   className,
 }: ProgressProps) {
   const pct = max <= 0 ? 0 : Math.min(100, Math.max(0, (value / max) * 100));
@@ -42,7 +46,11 @@ export function Progress({
       )}
     >
       <div
-        className={cn('h-full rounded-full transition-[width] duration-500 ease-[var(--ease-out-quint)]', TONES[resolved])}
+        className={cn(
+          'h-full rounded-full transition-[width] duration-700 ease-[var(--ease-out-quint)]',
+          TONES[resolved],
+          striped && 'bar-stripes',
+        )}
         style={{ width: `${pct}%` }}
       />
     </div>

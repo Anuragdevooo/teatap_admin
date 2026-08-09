@@ -426,6 +426,89 @@
   }
 }
 
+/* A soft band of brand light sweeps across a surface on hover. Decorative
+   only: it paints above the background but below content, and never takes
+   the pointer. */
+@keyframes sheen-sweep {
+  from {
+    transform: translateX(-65%);
+  }
+  to {
+    transform: translateX(65%);
+  }
+}
+@utility sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-65%);
+    background-image: linear-gradient(
+      100deg,
+      transparent 38%,
+      color-mix(in oklab, var(--primary) 10%, transparent) 50%,
+      transparent 62%
+    );
+    transition: opacity 0.35s var(--ease-out-quint);
+  }
+  &:hover::before {
+    opacity: 1;
+    animation: sheen-sweep 0.9s var(--ease-out-quint);
+  }
+}
+
+/* Diagonal motion on a progress fill. Reserved for work that is genuinely
+   still moving — a staged rollout — so "in flight" is legible without a label. */
+@keyframes stripes {
+  to {
+    background-position: 24px 0;
+  }
+}
+@utility bar-stripes {
+  background-image: linear-gradient(
+    115deg,
+    color-mix(in oklab, white 24%, transparent) 25%,
+    transparent 25%,
+    transparent 50%,
+    color-mix(in oklab, white 24%, transparent) 50%,
+    color-mix(in oklab, white 24%, transparent) 75%,
+    transparent 75%
+  );
+  background-size: 24px 24px;
+  animation: stripes 1s linear infinite;
+}
+
+/* A halo that breathes outward and fades. One element per screen at most —
+   it is an attention magnet, not decoration. */
+@keyframes halo {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 7px color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+}
+@utility halo {
+  animation: halo 2.4s var(--ease-out-quint) infinite;
+}
+
+/* Tactile press for non-Button affordances (segments, chips, toggles).
+   Only the pressed state is declared — the element owns its own
+   transition-property, so this composes with `transition-colors` and friends
+   instead of racing the shorthand. */
+@utility press {
+  &:active {
+    transform: scale(0.955);
+  }
+}
+
 @utility shimmer {
   position: relative;
   overflow: hidden;
