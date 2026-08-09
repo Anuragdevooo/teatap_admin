@@ -185,7 +185,10 @@ export function ReleasesPage() {
                 style={{ '--i': i } as React.CSSProperties}
                 className={cn(
                   'stagger-item lift sheen group relative flex flex-col overflow-hidden',
-                  release.isMinimumSupported && 'border-primary/50 ring-4 ring-primary/10',
+                  // Outline, not ring: `lift` replaces box-shadow on hover, and
+                  // a ring is a box-shadow — it would vanish under the pointer.
+                  release.isMinimumSupported &&
+                    'border-primary/50 outline-4 outline-offset-0 outline-primary/15',
                 )}
               >
                 {/* Brand hairline along the top edge. It wipes in on hover, and
